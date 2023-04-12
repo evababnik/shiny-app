@@ -195,6 +195,7 @@ server <- function(input, output, session) {
         summarise(total_value = sum(value)) %>%
         mutate(total_value = round(total_value, digits=2))
       total_nutrients_df <- total_nutrients_df[,c(1,3,2)]
+      total_nutrients_df <- total_nutrients_df[total_nutrients_df$unit != "kJ",]
       #names(total_nutrients_df) <- c("Nutrient", "Total value", "Unit")
       return(total_nutrients_df)} })
     
@@ -387,7 +388,7 @@ server <- function(input, output, session) {
       general$type <- factor(general$type, levels = c( "missing_percentage","full_percentage"))
       
       fill_colors <-ifelse(general$type == "full_percentage",  "white",colours)
-      
+      print(general)
       # Plot the data with the manual fill colors and reordered 'type' column
       plot<-  ggplot(general, aes(x = nutrient_skrajsano, y = value, fill = type)) + 
         geom_bar(stat = "identity") +
