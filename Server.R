@@ -47,47 +47,47 @@ get_foods <- function(query) {
 ##### Server function #####
 ###########################
 server <- function(input, output, session) {
-#
-#  ss <- naredi_zemljevid(country, 'Alpha-tocopherol')
-#  
-#
-#  output$map2 <- renderTmap({
-#    tm_shape(ss, bbox = c(-15, 45, 45, 50)) +
-#      tm_polygons(col = "mean_value", border.col = "black", lwd = 0.5, zindex = 401)
-#  })
-#
-#  observe({
-#    var <- input$var2
-#    zem <- naredi_zemljevid(country, var)
-#
-#    tmapProxy("map2", session, {
-#      tmap_mode("view")
-#      tm_remove_layer(401) +
-#        tm_shape(zem, bbox = c(-15, 45, 45, 50)) +
-#        tm_polygons(col = "mean_value", border.col = "black", lwd = 0.5, zindex = 401) +
-#        tm_fill( popup.vars=c('NUTRIENT_TEXT', 'mean_value'))
-#    })
-#  })
-#  
-#  output$table2 <- renderReactable ({
-#    var <- input$var2
-#    tab1 <- tabela1(country, var) 
-#    tab2 <- tabela2(country, var)
-#    reactable(tab1,
-#              filterable = TRUE,
-#              resizable = TRUE,
-#              compact = TRUE,
-#              details = function(index) {
-#                coun <- tab2 %>% filter(level1 == tab1$level1[index]) 
-#                coun2 <- coun  %>% data.frame() %>% select(-c('level1'))
-#                tbl <- reactable(coun2, outlined = TRUE, highlight = TRUE, fullWidth = TRUE)
-#                htmltools::div(style = list(margin = "12px 100px"), tbl)
-#              },
-#              onClick = "expand",
-#              rowStyle = list(cursor = "pointer"),
-#              defaultPageSize = 30
-#              )
-#  })
+
+  ss <- naredi_zemljevid(country, 'Alpha-tocopherol')
+  
+  
+  output$map2 <- renderTmap({
+    tm_shape(ss, bbox = c(-15, 45, 45, 50)) +
+      tm_polygons(col = "mean_value", border.col = "black", lwd = 0.5, zindex = 401)
+  })
+  
+  observe({
+    var <- input$var2
+    zem <- naredi_zemljevid(country, var)
+    
+    tmapProxy("map2", session, {
+      tmap_mode("view")
+      tm_remove_layer(401) +
+        tm_shape(zem, bbox = c(-15, 45, 45, 50)) +
+        tm_polygons(col = "mean_value", border.col = "black", lwd = 0.5, zindex = 401) +
+        tm_fill( popup.vars=c('NUTRIENT_TEXT', 'mean_value'))
+    })
+  })
+  
+  output$table2 <- renderReactable ({
+    var <- input$var2
+    tab1 <- tabela1(country, var) 
+    tab2 <- tabela2(country, var)
+    reactable(tab1,
+              filterable = TRUE,
+              resizable = TRUE,
+              compact = TRUE,
+              details = function(index) {
+                coun <- tab2 %>% filter(level1 == tab1$level1[index]) 
+                coun2 <- coun  %>% data.frame() %>% select(-c('level1'))
+                tbl <- reactable(coun2, outlined = TRUE, highlight = TRUE, fullWidth = TRUE)
+                htmltools::div(style = list(margin = "12px 100px"), tbl)
+              },
+              onClick = "expand",
+              rowStyle = list(cursor = "pointer"),
+              defaultPageSize = 30
+    )
+  })
   # reagiraj na spremembe v iskalnem nizu
   recommended_foods <- reactive({
     query <- input$food_query
@@ -388,8 +388,7 @@ server <- function(input, output, session) {
       general$type <- factor(general$type, levels = c( "missing_percentage","full_percentage"))
       
       fill_colors <-ifelse(general$type == "full_percentage",  "white",colours)
-      print(general)
-      # Plot the data with the manual fill colors and reordered 'type' column
+     
       plot<-  ggplot(general, aes(x = nutrient_skrajsano, y = value, fill = type)) + 
         geom_bar(stat = "identity") +
         geom_text(aes(label=ifelse(type=="full_percentage", paste0(percentage, "%"), " ")))+
@@ -444,20 +443,12 @@ server <- function(input, output, session) {
         ) %>%
         pull(colours)
       
-      # Priprava podatkov
-      
-      
-      # Izris grafikona
-      
-      
-      
       
       lipids$type <- factor(lipids$type, levels = c( "missing_percentage","full_percentage"))
       
       fill_colors <-ifelse(lipids$type == "full_percentage",  "white",colours)
       
       
-      # Plot the data with the manual fill colors and reordered 'type' column
       plot<-  ggplot(lipids, aes(x = nutrient_skrajsano, y = value, fill = type)) + 
         geom_bar(stat = "identity") +
         geom_text(aes(label=ifelse(type=="full_percentage", paste0(percentage, "%"), " ")))+
@@ -516,8 +507,7 @@ server <- function(input, output, session) {
       Carbohydrate$type <- factor(Carbohydrate$type, levels = c( "missing_percentage","full_percentage"))
       
       fill_colors <-ifelse(Carbohydrate$type == "full_percentage",  "white",colours)
-      
-      # Plot the data with the manual fill colors and reordered 'type' column
+     
       plot<-  ggplot(Carbohydrate, aes(x = nutrient_skrajsano, y = value, fill = type)) + 
         geom_bar(stat = "identity") +
         geom_text(aes(label=ifelse(type=="full_percentage", paste0(percentage, "%"), " ")))+

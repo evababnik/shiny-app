@@ -79,9 +79,9 @@ ui <- navbarPage(
              )))),
   
   tabPanel('Analiza', icon = icon("table"),
-           #  selectInput("var2", "Variable2", nutrienti_vsi2),
-           #  tmapOutput("map2"),
-           #  reactableOutput('table2')
+             selectInput("var2", "Variable2", nutrienti_vsi2),
+            tmapOutput("map2"),
+            reactableOutput('table2')
   )
 )
 
