@@ -5,7 +5,7 @@ library(lubridate)
 library(plotly)
 library(shinythemes)
 library(shinydashboard)
-
+library(tmap)
 
 ###########################
 ##### Server function #####

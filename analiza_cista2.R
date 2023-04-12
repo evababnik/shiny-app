@@ -1,9 +1,21 @@
+library(tidyverse)
+library(lubridate)
+library(plotly)
+library(shinythemes)
+library(shinydashboard)
+library(bslib)
+library(tmap)
+library(reactable)
+library(shiny)
+
+
+
 library(readxl)
 library(eurostat)
 library(sf)
 library(leaflet)
-library(tmap)
-library(tidyverse)
+
+
 library(reshape2)
 
 
@@ -27,7 +39,7 @@ naredi_zemljevid <- function(podatki, nutrient) {
   podatki <- podatki %>% group_by(COUNTRY, kratice, NUTRIENT_TEXT) %>% summarize(mean_value = mean(mean_nutri)) %>%
     dplyr::filter(NUTRIENT_TEXT == nutrient)
 
-  ss <- st_transform(SHP_0)
+  ss <- sf::st_transform(SHP_0)
   ss <- ss %>% dplyr::filter(geo %in% drzave$kratice) %>% left_join(podatki, by = c('geo' = 'kratice')) %>%
     select(geometry, COUNTRY, NUTRIENT_TEXT, mean_value) %>% drop_na(COUNTRY)
 
