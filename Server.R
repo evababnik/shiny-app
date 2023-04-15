@@ -1,4 +1,3 @@
-
 library(shiny)
 library(tidyverse)
 library(lubridate)
@@ -9,53 +8,43 @@ library(readxl)
 library(eurostat)
 library(tmap)
 library(reactable)
-library(shiny)
 library(httr)
 library(dplyr)
 library(readr)
-library(readxl)
 library(tidyr)
 library(grid)
-library(tidyverse)
 library(shadowtext)
 library(ggplot2)
 library(gridExtra)
 library(shinyWidgets)
 library(shinycssloaders)
 library(DT)
-library(shinydashboard)
 library(data.table)
+library(tmaptools)
+library(leaflet)
+library(tm)
+library(bslib)
+library(sf)
+library(reshape2)
 
+source("calculator.R")
+source("analiza_cista2.R")
 
-daily_intake <-  read_excel("rdv.xlsx")
-
-# funkcija za poizvedbo API-ja
-get_foods <- function(query) {
-  url <- "https://api.nal.usda.gov/fdc/v1/foods/search"
-  params <- list(
-    generalSearchInput = query,
-    api_key = "kHbFWekgGusKc2LfzKp4dWpa6508yiI2Qx2IPLs8"
-  )
-  response <- httr::GET(url, query = params)
-  foods <- httr::content(response, "parsed")$foods
-  
-  return(foods)
-}
 
 
 ###########################
 ##### Server function #####
 ###########################
 server <- function(input, output, session) {
+source("calculator.R")
+source("analiza_cista2.R")
+ss <- naredi_zemljevid(country, 'Alpha-tocopherol')
 
-  ss <- naredi_zemljevid(country, 'Alpha-tocopherol')
-  
-  
   output$map2 <- renderTmap({
     tm_shape(ss, bbox = c(-15, 45, 45, 50)) +
       tm_polygons(col = "mean_value", border.col = "black", lwd = 0.5, zindex = 401)
   })
-  
+
   observe({
     var <- input$var2
     zem <- naredi_zemljevid(country, var)
@@ -68,7 +57,7 @@ server <- function(input, output, session) {
         tm_fill( popup.vars=c('NUTRIENT_TEXT', 'mean_value'))
     })
   })
-  
+
   output$table2 <- renderReactable ({
     var <- input$var2
     tab1 <- tabela1(country, var) 
@@ -78,15 +67,9 @@ server <- function(input, output, session) {
               resizable = TRUE,
               compact = TRUE,
               details = function(index) {
-                coun <- tab2 %>% filter(level1 == tab1$level1[index]) 
-                coun2 <- coun  %>% data.frame() %>% select(-c('level1'))
-                tbl <- reactable(coun2, outlined = TRUE, highlight = TRUE, fullWidth = TRUE)
-                htmltools::div(style = list(margin = "12px 100px"), tbl)
-              },
-              onClick = "expand",
-              rowStyle = list(cursor = "pointer"),
-              defaultPageSize = 30
-    )
+                coun <- tab2 %>% filter(level1 == tab1$level1[index])
+                return(reactable(coun,  highlight = TRUE))
+              })
   })
   # reagiraj na spremembe v iskalnem nizu
   recommended_foods <- reactive({
@@ -197,6 +180,7 @@ server <- function(input, output, session) {
       total_nutrients_df <- total_nutrients_df[,c(1,3,2)]
       total_nutrients_df <- total_nutrients_df[total_nutrients_df$unit != "kJ",]
       #names(total_nutrients_df) <- c("Nutrient", "Total value", "Unit")
+      total_nutrients_df <-  total_nutrients_df %>% arrange(desc(total_value))
       return(total_nutrients_df)} })
     
     
@@ -216,7 +200,7 @@ server <- function(input, output, session) {
       )
       nutrients_df$value <- nutrients_df$value * (as.numeric(input$quantity)/ 100)
       nutrients_df$value <- round(nutrients_df$value, digits = 2)
-      
+      nutrients_df <- nutrients_df %>% arrange(desc(value))
       return(nutrients_df)
     }
   })
@@ -473,7 +457,37 @@ server <- function(input, output, session) {
       
       
       Carbohydrate <- daily_intake %>% filter(Type=="Carbohydrate" & (Gender==input$gender | Gender == "Both"))
-      Carbohydrate <- merge(Carbohydrate,total_nutrients_df(), by="nutrient", all.x=TRUE)
+       
+    
+      nutrient_cols <- c("nutrient", "nutrient2", "nutrient3","nutrient4")
+      total_nutrients_df <- as.data.frame(total_nutrients_df())
+     
+     
+      # Ustvarite novo prazno polje v tabeli Carbohydrate za shranjevanje skupne vrednosti
+      Carbohydrate$total_value <- rep(0, nrow(Carbohydrate))
+      
+      # Za vsako vrstico v tabeli Carbohydrate poiščite ustrezno vrednost v tabeli total_nutrients_df
+      for (i in 1:nrow(Carbohydrate)) {
+        # Poiščite vrednost v tabeli total_nutrients_df, ki se ujema z vrednostmi v stolpcih nutrient1, nutrient2 ali nutrient3
+        match_rows <- total_nutrients_df %>% 
+          filter(nutrient == Carbohydrate$nutrient[i] | 
+                   nutrient == Carbohydrate$nutrient2[i] | 
+                   nutrient == Carbohydrate$nutrient3[i] | 
+                   nutrient == Carbohydrate$nutrient4[i]) %>%
+          select(total_value)
+   
+       
+        # Če je bila najdena ujemanje, dodelite ustrezno vrednost v polje total_value v tabeli Carbohydrate
+        if (length(match_rows) > 0) {
+          Carbohydrate$total_value[i] <- match_rows$total_value[1]
+        }
+      }
+      
+      
+      
+      
+   
+      
       Carbohydrate$"Average Daily Intake" <- as.numeric(Carbohydrate$"Average Daily Intake")
       Carbohydrate$"Min Daily Intake" <- as.numeric(Carbohydrate$"Min Daily Intake")
       Carbohydrate$"Max Daily Intake" <- as.numeric(Carbohydrate$"Max Daily Intake")
@@ -505,9 +519,9 @@ server <- function(input, output, session) {
       
       
       Carbohydrate$type <- factor(Carbohydrate$type, levels = c( "missing_percentage","full_percentage"))
-      
+      Carbohydrate <- as.data.frame(Carbohydrate)
       fill_colors <-ifelse(Carbohydrate$type == "full_percentage",  "white",colours)
-     
+    
       plot<-  ggplot(Carbohydrate, aes(x = nutrient_skrajsano, y = value, fill = type)) + 
         geom_bar(stat = "identity") +
         geom_text(aes(label=ifelse(type=="full_percentage", paste0(percentage, "%"), " ")))+
@@ -530,8 +544,8 @@ server <- function(input, output, session) {
     if(!is.null(added_foods$data)){
       
       
-      Protein <- daily_intake %>% filter(Type=="Protein" & (Gender==input$gender | Gender == "Both"))
-      Protein$Type <- NULL
+      Protein <- daily_intake %>% filter(Type == "Protein" & (Gender==input$gender | Gender == "Both"))
+      
       Protein <- merge(Protein,total_nutrients_df(), by="nutrient", all.x=TRUE)
       Protein$"Average Daily Intake" <- as.numeric(Protein$"Average Daily Intake")
       Protein$"Min Daily Intake" <- as.numeric(Protein$"Min Daily Intake")
@@ -539,65 +553,44 @@ server <- function(input, output, session) {
       Protein$total_value <- as.numeric(ifelse(is.na(Protein$total_value),0,Protein$total_value))
       
       Protein$percentage <- ifelse(is.na(Protein$"Average Daily Intake"),Protein$total_value , round(Protein$total_value / (Protein$"Average Daily Intake") * 100,1))
-      Protein$missing_percentage <- ifelse(Protein$percentage < 100, 100 - Protein$percentage, 0)
+      Protein$white <- ifelse(Protein$percentage < 100, 100 - Protein$percentage, 0)
       Protein$full_percentage <- ifelse(Protein$percentage > 100, 100, Protein$percentage)
       
+      Protein$red <- 0
+      Protein$red[Protein$total_value >= Protein$`Max Daily Intake` & !is.na(Protein$`Max Daily Intake`)] <- Protein$full_percentage[Protein$total_value >= Protein$`Max Daily Intake`& !is.na(Protein$`Max Daily Intake`)]
+      Protein$yellow <- 0
+      Protein$yellow[Protein$total_value <= Protein$`Min Daily Intake` & !is.na(Protein$`Min Daily Intake`)] <- Protein$full_percentage[Protein$total_value <= Protein$`Min Daily Intake`& !is.na(Protein$`Min Daily Intake`)]
+     
+      Protein$green <- ifelse(Protein$yellow == 0 & Protein$red == 0, Protein$full_percentage, 0)
+      ##Protein$text <- ifelse(Protein$white == 100, "0%",paste0(max(Protein$red, Protein$yellow, Protein$green), "%"))
       
       Protein <- pivot_longer(Protein, 
-                              cols = c("full_percentage", "missing_percentage"),
+                              cols = c("green", "yellow", "red", "white"),
                               names_to = "type",
                               values_to = "value")
       
+    Protein$text <- rep(" ", nrow(Protein))
+     Protein$text[Protein$type == "white"] <- " "
+     Protein$text[Protein$value != 0 & Protein$type != "white"] <- paste0(Protein$percentage[Protein$value != 0 & Protein$type != "white"], "%")
+     Protein$text[lag(Protein$value) == 0 & lead(Protein$value) == 0 & Protein$value == 0 & Protein$type == "yellow"] <- "0%"
+     
+ 
+   
+ Protein <- as.data.frame(Protein)
+ Protein$type <- factor(Protein$type, levels = c("white","green","yellow", "red"))
+    plot<-ggplot(Protein, aes(x = nutrient_skrajsano, y = value, fill = type)) + 
+      geom_bar(stat = "identity") +
+      coord_flip()+
+      geom_text(aes(label = text))+
+     
+      scale_fill_manual(values = c("green" = "green", "yellow" = "yellow", "red"="red", "white"= "white"), guide="none")+
+      theme(axis.text.x = element_blank(),
+                       axis.title.x = element_blank(),
+                        axis.title.y = element_blank()) 
+                
       
-      colours <- Protein %>%
-        mutate(colours = case_when(
-          
-          
-          
-          (total_value > `Max Daily Intake`)~ "red",
-          (total_value < `Min Daily Intake`)~ "yellow",
-          TRUE ~ "green"
-        ))%>%
-        pull(colours)
-    
- #   fill_colors <- ifelse(Protein$type == "full_percentage", colours, "white")
- #   Protein$colours <- fill_colors
- #  
- # 
- #   
- #  for (i in 1:18){
- #    type <- Protein$type[i]
- #    Protein$type[i] <- paste0(type, i)
- #  }
- #   
- #   print(Protein)
-      
-      
-    
-    
-    #plot<-ggplot(Protein, aes(x = nutrient_skrajsano, y = value, fill = interaction(nutrient_skrajsano, colours, type))) + 
-     # geom_bar(stat = "identity",  position = "stack") +
-     # scale_fill_manual(values = (Protein$colours))
-      
-      
-      Protein$type <- factor(Protein$type, levels = c( "missing_percentage","full_percentage"))
-      
-      fill_colors <-ifelse(Protein$type == "full_percentage",  "white",colours)
-      
-      # Plot the data with the manual fill colors and reordered 'type' column
-      plot<-  ggplot(Protein, aes(x = nutrient_skrajsano, y = value, fill = type)) + 
-        geom_bar(stat = "identity") +
-        geom_text(aes(label=ifelse(type=="full_percentage", paste0(percentage, "%"), " ")))+
-        
-        
-        coord_flip() +
-        scale_fill_manual(values = fill_colors, guide = "none")+
-        theme(axis.text.x = element_blank(),
-              axis.title.x = element_blank(),
-              axis.title.y = element_blank())
-      
-      
-      
+
+  #    
       return(plot)
     }
   })

@@ -19,7 +19,7 @@ library(leaflet)
 
 
 library(reshape2)
-
+source("analiza_cista2.R")
 ##########################
 ##### User interface #####
 ##########################
@@ -42,7 +42,7 @@ ui <- navbarPage(
                           verbatimTextOutput("recommended_foods"),
                           selectInput("food_name", label = "Select a food", choices = c(), selected = ""),
                           
-                          textInput("quantity", label="Select quantity", placeholder= "Enter food quantity (in grams)"),
+                          textInput("quantity", label="Select quantity (in grams)", value= 100, placeholder= "Enter food quantity (in grams)"),
                           selectInput("gender", label="Select gender", choices = c("Male", "Female")),
                           actionButton("add_food", "Add food"),
                           DT::DTOutput("food_table")

@@ -28,6 +28,7 @@ drzave <- data.frame(
 country <- FCD %>% group_by(COUNTRY, NUTRIENT_TEXT, level1, level2)%>% summarize(mean_nutri = mean(LEVEL)) %>%
   left_join(drzave, by = c('COUNTRY'= 'imena'))
 
+
 nutrienti_vsi2 <- unique(country$NUTRIENT_TEXT)
 
 SHP_0 <- get_eurostat_geospatial(resolution = 10, 
@@ -54,6 +55,7 @@ tabela1 <- function(podatki, nutrient) {
     return(podatki)
 }
 
+
 tabela2 <- function(podatki, nutrient) {
   podatki <- podatki %>% dplyr::filter(NUTRIENT_TEXT == nutrient) %>%
     group_by(COUNTRY, level1, level2) %>% summarize(mean_value = mean(mean_nutri)) %>% mutate_if(is.numeric, round, digits = 2)
@@ -61,4 +63,5 @@ tabela2 <- function(podatki, nutrient) {
   
   return(podatki)
 }
+ss <- naredi_zemljevid(country, 'Alpha-tocopherol')
 
