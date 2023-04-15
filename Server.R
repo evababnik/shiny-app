@@ -26,7 +26,7 @@ library(tm)
 library(bslib)
 library(sf)
 library(reshape2)
-
+library(htmltools)
 source("calculator.R")
 source("analiza_cista2.R")
 
@@ -212,388 +212,398 @@ ss <- naredi_zemljevid(country, 'Alpha-tocopherol')
   
   
   ##minerals
-  
-  
-  output$minerals_plot <- renderPlot({
+  output$minerals_plot <- renderReactable({
     if(!is.null(added_foods$data)){
-      
-      
-      minerals <- daily_intake %>% filter(Type=="Mineral" & (Gender==input$gender | Gender == "Both"))
-      minerals <- merge(minerals,total_nutrients_df(), by="nutrient", all.x=TRUE)
-      minerals$"Average Daily Intake" <- as.numeric(minerals$"Average Daily Intake")
-      minerals$"Min Daily Intake" <- as.numeric(minerals$"Min Daily Intake")
-      minerals$"Max Daily Intake" <- as.numeric(minerals$"Max Daily Intake")
-      minerals$total_value <- ifelse(is.na(minerals$total_value),0, minerals$total_value)
-      
-      
-      minerals$total_value <- ifelse(is.na(minerals$total_value),0, minerals$total_value)
-      minerals$percentage <- ifelse(is.na(minerals$"Average Daily Intake"), minerals$total_value , round(minerals$total_value / (minerals$"Average Daily Intake") * 100,1))
-      minerals$missing_percentage <- ifelse(minerals$percentage < 100, 100 - minerals$percentage, 0)
-      minerals$full_percentage <- ifelse(minerals$percentage > 100, 100,  minerals$percentage)
-      
-      
-      minerals<- pivot_longer(minerals, 
-                              cols = c("full_percentage", "missing_percentage"),
-                              names_to = "type",
-                              values_to = "value")
-      
-      
-      
-      
-      colours <-  minerals%>%
-        mutate(
-          colours = case_when(
-            is.na(`Max Daily Intake`) | is.na(`Min Daily Intake`) ~ "green",
-            `total_value` >= as.numeric(`Max Daily Intake`) ~ "red",
-            `total_value` < as.numeric(`Min Daily Intake`) ~ "yellow",
-            TRUE ~ "green"
-          )
-        ) %>%
-        pull(colours)
-      
-      minerals$type <- factor(minerals$type, levels = c( "missing_percentage","full_percentage"))
-      
-      fill_colors <-ifelse(minerals$type == "full_percentage",  "white",colours)
-      
-      # Plot the data with the manual fill colors and reordered 'type' column
-      plot<-  ggplot(minerals, aes(x = nutrient_skrajsano, y = value, fill = type)) + 
-        geom_bar(stat = "identity") +
-        geom_text(aes(label=ifelse(type=="full_percentage", paste0(percentage, "%"), " ")))+
-        
-        
-        coord_flip() +
-        scale_fill_manual(values = fill_colors, guide = "none")+
-        theme(axis.text.x = element_blank(),
-              axis.title.x = element_blank(),
-              axis.title.y = element_blank())
-      
-      
-      return(plot)
-    }
-  })
-  
-  
-  
-  
-  ##vitamins
-  
-  output$vitamins_plot <- renderPlot({
-    if(!is.null(added_foods$data)){
-      
-      
-      vitamins <- daily_intake %>% filter(Type=="Vitamin" & (Gender==input$gender | Gender == "Both"))
-      vitamins <- merge(vitamins,total_nutrients_df(), by="nutrient", all.x=TRUE)
-      vitamins$"Average Daily Intake" <- as.numeric(vitamins$"Average Daily Intake")
-      vitamins$"Min Daily Intake" <- as.numeric(vitamins$"Min Daily Intake")
-      vitamins$"Max Daily Intake" <- as.numeric(vitamins$"Max Daily Intake")
-      vitamins$total_value <- ifelse(is.na(vitamins$total_value),0, vitamins$total_value)
-      vitamins$percentage <- ifelse(is.na(vitamins$"Average Daily Intake"), vitamins$total_value , round(vitamins$total_value / (vitamins$"Average Daily Intake") * 100,1))
-      vitamins$missing_percentage <- ifelse(vitamins$percentage < 100, 100 -  vitamins$percentage, 0)
-      vitamins$full_percentage <- ifelse(vitamins$percentage > 100, 100,  vitamins$percentage)
-      
-      
-      vitamins<- pivot_longer(vitamins, 
-                              cols = c("full_percentage", "missing_percentage"),
-                              names_to = "type",
-                              values_to = "value")
-      
-      
-      
-      
-      colours <-  vitamins%>%
-        mutate(
-          colours = case_when(
-            is.na(`Max Daily Intake`) | is.na(`Min Daily Intake`) ~ "green",
-            `total_value` >= as.numeric(`Max Daily Intake`) ~ "red",
-            `total_value` < as.numeric(`Min Daily Intake`) ~ "yellow",
-            TRUE ~ "green"
-          )
-        ) %>%
-        pull(colours)
-      
-      vitamins$type <- factor(vitamins$type, levels = c( "missing_percentage","full_percentage"))
-      
-      fill_colors <-ifelse(vitamins$type == "full_percentage",  "white",colours)
-      
-      # Plot the data with the manual fill colors and reordered 'type' column
-      plot<-  ggplot(vitamins, aes(x = nutrient_skrajsano, y = value, fill = type)) + 
-        geom_bar(stat = "identity") +
-        geom_text(aes(label=ifelse(type=="full_percentage", paste0(percentage, "%"), " ")))+
-        
-        
-        coord_flip() +
-        scale_fill_manual(values = fill_colors, guide = "none")+
-        theme(axis.text.x = element_blank(),
-              axis.title.x = element_blank(),
-              axis.title.y = element_blank())
-      
-      
-      return(plot)
-    }
-  })
-  
-  
-  ###General
-  output$general_plot <- renderPlot({
-    if(!is.null(added_foods$data)){
-      
-      
-      general <- daily_intake %>% filter(Type=="General" & (Gender==input$gender | Gender == "Both"))
-      general <- merge(general,total_nutrients_df(), by="nutrient", all.x=TRUE)
-      general$"Average Daily Intake" <- as.numeric(general$"Average Daily Intake")
-      general$"Min Daily Intake" <- as.numeric(general$"Min Daily Intake")
-      general$"Max Daily Intake" <- as.numeric(general$"Max Daily Intake")
-      general$total_value <- ifelse(is.na(general$total_value),0, general$total_value)
-      
-      general$percentage <- ifelse(is.na(general$"Average Daily Intake"), general$total_value , round(general$total_value / (general$"Average Daily Intake") * 100,1))
-      general$missing_percentage <- ifelse(general$percentage < 100, 100 -  general$percentage, 0)
-      general$full_percentage <- ifelse(general$percentage > 100, 100,  general$percentage)
-      
-      
-      general<- pivot_longer(general, 
-                             cols = c("full_percentage", "missing_percentage"),
-                             names_to = "type",
-                             values_to = "value")
-      
-      
-      
-      
-      colours <-  general%>%
-        mutate(
-          colours = case_when(
-            is.na(`Max Daily Intake`) | is.na(`Min Daily Intake`) ~ "green",
-            `total_value` >= as.numeric(`Max Daily Intake`) ~ "red",
-            `total_value` < as.numeric(`Min Daily Intake`) ~ "yellow",
-            TRUE ~ "green"
-          )
-        ) %>%
-        pull(colours)
-      
-      general$type <- factor(general$type, levels = c( "missing_percentage","full_percentage"))
-      
-      fill_colors <-ifelse(general$type == "full_percentage",  "white",colours)
-     
-      plot<-  ggplot(general, aes(x = nutrient_skrajsano, y = value, fill = type)) + 
-        geom_bar(stat = "identity") +
-        geom_text(aes(label=ifelse(type=="full_percentage", paste0(percentage, "%"), " ")))+
-        
-        
-        coord_flip() +
-        scale_fill_manual(values = fill_colors, guide = "none")+
-        theme(axis.text.x = element_blank(),
-              axis.title.x = element_blank(),
-              axis.title.y = element_blank())
-      
-      
-      return(plot)
-    }
-  })
-  
-  
-  ###Lipids
-  output$lipids_plot <- renderPlot({
-    if(!is.null(added_foods$data)){
-      
-      
-      lipids <- daily_intake %>% filter(Type=="Lipids" & (Gender==input$gender | Gender == "Both"))
-      lipids <- merge(lipids,total_nutrients_df(), by="nutrient", all.x=TRUE)
-      lipids$"Average Daily Intake" <- as.numeric(lipids$"Average Daily Intake")
-      lipids$"Min Daily Intake" <- as.numeric(lipids$"Min Daily Intake")
-      lipids$"Max Daily Intake" <- as.numeric(lipids$"Max Daily Intake")
-      lipids$total_value <- ifelse(is.na(lipids$total_value),0, lipids$total_value)
-      
-      
-      lipids$percentage <- ifelse(is.na(lipids$"Average Daily Intake"), lipids$total_value , round(lipids$total_value / (lipids$"Average Daily Intake") * 100,1))
-      lipids$missing_percentage <- ifelse(lipids$percentage < 100, 100 -  lipids$percentage, 0)
-      lipids$full_percentage <- ifelse(lipids$percentage > 100, 100,  lipids$percentage)
-      
-      
-      lipids <- pivot_longer(lipids, 
-                             cols = c("full_percentage", "missing_percentage"),
-                             names_to = "type",
-                             values_to = "value")
-      
-      
-      
-      
-      colours <-  lipids%>%
-        mutate(
-          colours = case_when(
-            is.na(`Max Daily Intake`) | is.na(`Min Daily Intake`) ~ "green",
-            `total_value` >= as.numeric(`Max Daily Intake`) ~ "red",
-            `total_value` < as.numeric(`Min Daily Intake`) ~ "yellow",
-            TRUE ~ "green"
-          )
-        ) %>%
-        pull(colours)
-      
-      
-      lipids$type <- factor(lipids$type, levels = c( "missing_percentage","full_percentage"))
-      
-      fill_colors <-ifelse(lipids$type == "full_percentage",  "white",colours)
-      
-      
-      plot<-  ggplot(lipids, aes(x = nutrient_skrajsano, y = value, fill = type)) + 
-        geom_bar(stat = "identity") +
-        geom_text(aes(label=ifelse(type=="full_percentage", paste0(percentage, "%"), " ")))+
-        
-        
-        coord_flip() +
-        scale_fill_manual(values = fill_colors, guide = "none")+
-        theme(axis.text.x = element_blank(),
-              axis.title.x = element_blank(),
-              axis.title.y = element_blank())
-      
-      
-      return(plot)
-    }
-  })
-  
-  
-  
-  ###Carbohydrate
-  output$carbohydrate_plot <- renderPlot({
-    if(!is.null(added_foods$data)){
-      
-      
-      Carbohydrate <- daily_intake %>% filter(Type=="Carbohydrate" & (Gender==input$gender | Gender == "Both"))
-       
-    
+      table <- daily_intake %>% filter(Type=="Mineral" & (Gender==input$gender | Gender == "Both"))
       nutrient_cols <- c("nutrient", "nutrient2", "nutrient3","nutrient4")
       total_nutrients_df <- as.data.frame(total_nutrients_df())
-     
-     
-      # Ustvarite novo prazno polje v tabeli Carbohydrate za shranjevanje skupne vrednosti
-      Carbohydrate$total_value <- rep(0, nrow(Carbohydrate))
       
-      # Za vsako vrstico v tabeli Carbohydrate poiščite ustrezno vrednost v tabeli total_nutrients_df
-      for (i in 1:nrow(Carbohydrate)) {
-        # Poiščite vrednost v tabeli total_nutrients_df, ki se ujema z vrednostmi v stolpcih nutrient1, nutrient2 ali nutrient3
+      table$total_value <- rep(0, nrow(table))
+      
+      for (i in 1:nrow(table)) {
         match_rows <- total_nutrients_df %>% 
-          filter(nutrient == Carbohydrate$nutrient[i] | 
-                   nutrient == Carbohydrate$nutrient2[i] | 
-                   nutrient == Carbohydrate$nutrient3[i] | 
-                   nutrient == Carbohydrate$nutrient4[i]) %>%
+          filter(nutrient == table$nutrient[i] | 
+                   nutrient == table$nutrient2[i] | 
+                   nutrient == table$nutrient3[i] | 
+                   nutrient == table$nutrient4[i]) %>%
           select(total_value)
-   
-       
-        # Če je bila najdena ujemanje, dodelite ustrezno vrednost v polje total_value v tabeli Carbohydrate
+        
         if (length(match_rows) > 0) {
-          Carbohydrate$total_value[i] <- match_rows$total_value[1]
+          table$total_value[i] <- match_rows$total_value[1]
         }
       }
       
       
+      table$"Average Daily Intake" <- as.numeric(table$"Average Daily Intake")
+      table$"Min Daily Intake" <- as.numeric(table$"Min Daily Intake")
+      table$"Max Daily Intake" <- as.numeric(table$"Max Daily Intake")
+      table$total_value <- ifelse(is.na(table$total_value),0,table$total_value)
       
       
-   
+      table$percentage <- ifelse(is.na(table$"Average Daily Intake"),table$total_value , round(table$total_value / (table$"Average Daily Intake") * 100,1))
       
-      Carbohydrate$"Average Daily Intake" <- as.numeric(Carbohydrate$"Average Daily Intake")
-      Carbohydrate$"Min Daily Intake" <- as.numeric(Carbohydrate$"Min Daily Intake")
-      Carbohydrate$"Max Daily Intake" <- as.numeric(Carbohydrate$"Max Daily Intake")
-      Carbohydrate$total_value <- ifelse(is.na(Carbohydrate$total_value),0,Carbohydrate$total_value)
-      
-      Carbohydrate$percentage <- ifelse(is.na(Carbohydrate$"Average Daily Intake"), Carbohydrate$total_value , round( Carbohydrate$total_value / ( Carbohydrate$"Average Daily Intake") * 100,1))
-      Carbohydrate$missing_percentage <- ifelse(Carbohydrate$percentage < 100, 100 -  Carbohydrate$percentage, 0)
-      Carbohydrate$full_percentage <- ifelse(Carbohydrate$percentage > 100, 100,  Carbohydrate$percentage)
-      
-      
-      Carbohydrate <- pivot_longer(Carbohydrate, 
-                                   cols = c("full_percentage", "missing_percentage"),
-                                   names_to = "type",
-                                   values_to = "value")
-      
-      
-      
-      
-      colours <-  Carbohydrate %>%
+      colours <-  table %>%
         mutate(
           colours = case_when(
-            is.na(`Max Daily Intake`) | is.na(`Min Daily Intake`) ~ "green",
-            `total_value` >= as.numeric(`Max Daily Intake`) ~ "red",
-            `total_value` < as.numeric(`Min Daily Intake`) ~ "yellow",
-            TRUE ~ "green"
+            `total_value` >= as.numeric(`Max Daily Intake`) & !is.na(`Max Daily Intake`) ~ "red",
+            `total_value` < as.numeric(`Min Daily Intake`) & !is.na(`Min Daily Intake`)  ~ "yellow",
+            TRUE ~ "#00FF00"
           )
         ) %>%
         pull(colours)
       
+      table$colours <- colours
+      table$total_value <- paste0(table$total_value, table$`Unit Name`)
+      table <- as.data.frame(table)
       
-      Carbohydrate$type <- factor(Carbohydrate$type, levels = c( "missing_percentage","full_percentage"))
-      Carbohydrate <- as.data.frame(Carbohydrate)
-      fill_colors <-ifelse(Carbohydrate$type == "full_percentage",  "white",colours)
+      table <- table[,c("nutrient_skrajsano", "total_value", "percentage")]
+      print(table)
+      
+      reactable(
+        table,
+        columns = list(
+          nutrient_skrajsano = colDef(name = "MINERALS", width = 120),
+          total_value = colDef(name = "Quantity", align = "right", width = 80, cell = function(value) {
+            value
+          }),
+          percentage = colDef(name = "Daily target (%)", align = "left", cell = function(value, rowIndex) {
+            width <- paste0(ifelse(value > 100, 100, value), "%")
+            color <- colours[rowIndex]
+            bar_chart(paste0(value, "%"), width = width, color = color, background = "#e1e1e1")
+          })
+        )
+      )
+    }})
+  
+  ##vitamins
+  
+  output$vitamins_plot <- renderReactable({
+    if(!is.null(added_foods$data)){
+      table <- daily_intake %>% filter(Type=="Vitamin" & (Gender==input$gender | Gender == "Both"))
+      nutrient_cols <- c("nutrient", "nutrient2", "nutrient3","nutrient4")
+      total_nutrients_df <- as.data.frame(total_nutrients_df())
+      
+      table$total_value <- rep(0, nrow(table))
+      
+      for (i in 1:nrow(table)) {
+        match_rows <- total_nutrients_df %>% 
+          filter(nutrient == table$nutrient[i] | 
+                   nutrient == table$nutrient2[i] | 
+                   nutrient == table$nutrient3[i] | 
+                   nutrient == table$nutrient4[i]) %>%
+          select(total_value)
+        
+        if (length(match_rows) > 0) {
+          table$total_value[i] <- match_rows$total_value[1]
+        }
+      }
+      
+      
+      table$"Average Daily Intake" <- as.numeric(table$"Average Daily Intake")
+      table$"Min Daily Intake" <- as.numeric(table$"Min Daily Intake")
+      table$"Max Daily Intake" <- as.numeric(table$"Max Daily Intake")
+      table$total_value <- ifelse(is.na(table$total_value),0,table$total_value)
+      
+      
+      table$percentage <- ifelse(is.na(table$"Average Daily Intake"),table$total_value , round(table$total_value / (table$"Average Daily Intake") * 100,1))
+      
+      colours <-  table %>%
+        mutate(
+          colours = case_when(
+            `total_value` >= as.numeric(`Max Daily Intake`) & !is.na(`Max Daily Intake`) ~ "red",
+            `total_value` < as.numeric(`Min Daily Intake`) & !is.na(`Min Daily Intake`)  ~ "yellow",
+            TRUE ~ "#00FF00"
+          )
+        ) %>%
+        pull(colours)
+      
+      table$colours <- colours
+      table$total_value <- paste0(table$total_value, table$`Unit Name`)
+      table <- as.data.frame(table)
+      
+      table <- table[,c("nutrient_skrajsano", "total_value", "percentage")]
+      print(table)
+      
+      reactable(
+        table,
+        columns = list(
+          nutrient_skrajsano = colDef(name = "VITAMINS", width = 120),
+          total_value = colDef(name = "Quantity", align = "right", width = 80, cell = function(value) {
+            value
+          }),
+          percentage = colDef(name = "Daily target (%)", align = "left", cell = function(value, rowIndex) {
+            width <- paste0(ifelse(value > 100, 100, value), "%")
+            color <- colours[rowIndex]
+            bar_chart(paste0(value, "%"), width = width, color = color, background = "#e1e1e1")
+          })
+        )
+      )
+    }})
+  
+  ###General
+  output$general_plot <- renderReactable({
+    if(!is.null(added_foods$data)){
+      table <- daily_intake %>% filter(Type=="General" & (Gender==input$gender | Gender == "Both"))
+      nutrient_cols <- c("nutrient", "nutrient2", "nutrient3","nutrient4")
+      total_nutrients_df <- as.data.frame(total_nutrients_df())
+      
+      table$total_value <- rep(0, nrow(table))
+      
+      for (i in 1:nrow(table)) {
+        match_rows <- total_nutrients_df %>% 
+          filter(nutrient == table$nutrient[i] | 
+                   nutrient == table$nutrient2[i] | 
+                   nutrient == table$nutrient3[i] | 
+                   nutrient == table$nutrient4[i]) %>%
+          select(total_value)
+        
+        if (length(match_rows) > 0) {
+          table$total_value[i] <- match_rows$total_value[1]
+        }
+      }
+      
+      
+      table$"Average Daily Intake" <- as.numeric(table$"Average Daily Intake")
+      table$"Min Daily Intake" <- as.numeric(table$"Min Daily Intake")
+      table$"Max Daily Intake" <- as.numeric(table$"Max Daily Intake")
+      table$total_value <- ifelse(is.na(table$total_value),0,table$total_value)
+      
+      
+      table$percentage <- ifelse(is.na(table$"Average Daily Intake"),table$total_value , round(table$total_value / (table$"Average Daily Intake") * 100,1))
+      
+      colours <-  table %>%
+        mutate(
+          colours = case_when(
+            `total_value` >= as.numeric(`Max Daily Intake`) & !is.na(`Max Daily Intake`) ~ "red",
+            `total_value` < as.numeric(`Min Daily Intake`) & !is.na(`Min Daily Intake`)  ~ "yellow",
+            TRUE ~ "#00FF00"
+          )
+        ) %>%
+        pull(colours)
+      
+      table$colours <- colours
+      table$total_value <- paste0(table$total_value, table$`Unit Name`)
+      table <- as.data.frame(table)
+      
+      table <- table[,c("nutrient_skrajsano", "total_value", "percentage")]
+      print(table)
+      
+      reactable(
+        table,
+        columns = list(
+          nutrient_skrajsano = colDef(name = "GENERAL", width = 120),
+          total_value = colDef(name = "Quantity", align = "right", width = 80, cell = function(value) {
+            value
+          }),
+          percentage = colDef(name = "Daily target (%)", align = "left", cell = function(value, rowIndex) {
+            width <- paste0(ifelse(value > 100, 100, value), "%")
+            color <- colours[rowIndex]
+            bar_chart(paste0(value, "%"), width = width, color = color, background = "#e1e1e1")
+          })
+        )
+      )
+    }})
+  
+  ###Lipids
+output$lipids_plot <- renderReactable({
+  if(!is.null(added_foods$data)){
+    table <- daily_intake %>% filter(Type=="Lipids" & (Gender==input$gender | Gender == "Both"))
+    nutrient_cols <- c("nutrient", "nutrient2", "nutrient3","nutrient4")
+    total_nutrients_df <- as.data.frame(total_nutrients_df())
     
-      plot<-  ggplot(Carbohydrate, aes(x = nutrient_skrajsano, y = value, fill = type)) + 
-        geom_bar(stat = "identity") +
-        geom_text(aes(label=ifelse(type=="full_percentage", paste0(percentage, "%"), " ")))+
-        
-        
-        coord_flip() +
-        scale_fill_manual(values = fill_colors, guide = "none")+
-        theme(axis.text.x = element_blank(),
-              axis.title.x = element_blank(),
-              axis.title.y = element_blank())
+    table$total_value <- rep(0, nrow(table))
+    
+    for (i in 1:nrow(table)) {
+      match_rows <- total_nutrients_df %>% 
+        filter(nutrient == table$nutrient[i] | 
+                 nutrient == table$nutrient2[i] | 
+                 nutrient == table$nutrient3[i] | 
+                 nutrient == table$nutrient4[i]) %>%
+        select(total_value)
       
-      
-      return(plot)
+      if (length(match_rows) > 0) {
+        table$total_value[i] <- match_rows$total_value[1]
+      }
     }
-  })
+    
+    
+    table$"Average Daily Intake" <- as.numeric(table$"Average Daily Intake")
+    table$"Min Daily Intake" <- as.numeric(table$"Min Daily Intake")
+    table$"Max Daily Intake" <- as.numeric(table$"Max Daily Intake")
+    table$total_value <- ifelse(is.na(table$total_value),0,table$total_value)
+    
+    
+    table$percentage <- ifelse(is.na(table$"Average Daily Intake"),table$total_value , round(table$total_value / (table$"Average Daily Intake") * 100,1))
+    
+    colours <-  table %>%
+      mutate(
+        colours = case_when(
+          `total_value` >= as.numeric(`Max Daily Intake`) & !is.na(`Max Daily Intake`) ~ "red",
+          `total_value` < as.numeric(`Min Daily Intake`) & !is.na(`Min Daily Intake`)  ~ "yellow",
+          TRUE ~ "#00FF00"
+        )
+      ) %>%
+      pull(colours)
+    
+    table$colours <- colours
+    table$total_value <- paste0(table$total_value, table$`Unit Name`)
+    table <- as.data.frame(table)
+    
+    table <- table[,c("nutrient_skrajsano", "total_value", "percentage")]
+    print(table)
+    
+    reactable(
+      table,
+      columns = list(
+        nutrient_skrajsano = colDef(name = "LIPIDS", width = 120),
+        total_value = colDef(name = "Quantity", align = "right", width = 80, cell = function(value) {
+          value
+        }),
+        percentage = colDef(name = "Daily target (%)", align = "left", cell = function(value, rowIndex) {
+          width <- paste0(ifelse(value > 100, 100, value), "%")
+          color <- colours[rowIndex]
+          bar_chart(paste0(value, "%"), width = width, color = color, background = "#e1e1e1")
+        })
+      )
+    )
+  }})
+
+
+  
+  
+  
+  ###Carbohydrate
+  output$carbohydrate_plot <- renderReactable({
+    if(!is.null(added_foods$data)){
+    table <- daily_intake %>% filter(Type=="Carbohydrate" & (Gender==input$gender | Gender == "Both"))
+      nutrient_cols <- c("nutrient", "nutrient2", "nutrient3","nutrient4")
+      total_nutrients_df <- as.data.frame(total_nutrients_df())
+   
+      table$total_value <- rep(0, nrow(table))
+  
+      for (i in 1:nrow(table)) {
+          match_rows <- total_nutrients_df %>% 
+          filter(nutrient == table$nutrient[i] | 
+                   nutrient == table$nutrient2[i] | 
+                   nutrient == table$nutrient3[i] | 
+                   nutrient == table$nutrient4[i]) %>%
+          select(total_value)
+  
+        if (length(match_rows) > 0) {
+          table$total_value[i] <- match_rows$total_value[1]
+        }
+      }
+      
+      
+      table$"Average Daily Intake" <- as.numeric(table$"Average Daily Intake")
+      table$"Min Daily Intake" <- as.numeric(table$"Min Daily Intake")
+      table$"Max Daily Intake" <- as.numeric(table$"Max Daily Intake")
+      table$total_value <- ifelse(is.na(table$total_value),0,table$total_value)
+     
+      
+      table$percentage <- ifelse(is.na(table$"Average Daily Intake"),table$total_value , round(table$total_value / (table$"Average Daily Intake") * 100,1))
+     
+      colours <-  table %>%
+        mutate(
+          colours = case_when(
+            `total_value` >= as.numeric(`Max Daily Intake`) & !is.na(`Max Daily Intake`) ~ "red",
+            `total_value` < as.numeric(`Min Daily Intake`) & !is.na(`Min Daily Intake`)  ~ "yellow",
+            TRUE ~ "#00FF00"
+          )
+        ) %>%
+        pull(colours)
+      
+      table$colours <- colours
+      table$total_value <- paste0(table$total_value, table$`Unit Name`)
+      table <- as.data.frame(table)
+      
+      table <- table[,c("nutrient_skrajsano", "total_value", "percentage")]
+      print(table)
+      
+      reactable(
+        table,
+        columns = list(
+          nutrient_skrajsano = colDef(name = "CARBOHYDRATES", width = 120),
+          total_value = colDef(name = "Quantity", align = "right", width = 80, cell = function(value) {
+            value
+          }),
+          percentage = colDef(name = "Daily target (%)", align = "left", cell = function(value, rowIndex) {
+            width <- paste0(ifelse(value > 100, 100, value), "%")
+            color <- colours[rowIndex]
+            bar_chart(paste0(value, "%"), width = width, color = color, background = "#e1e1e1")
+          })
+        )
+      )
+    }})
+   
   
   
   ###Protein
-  output$Protein_plot <- renderPlot({
+  output$Protein_plot <- renderReactable({
     if(!is.null(added_foods$data)){
+      table <- daily_intake %>% filter(Type=="Protein" & (Gender==input$gender | Gender == "Both"))
+      nutrient_cols <- c("nutrient", "nutrient2", "nutrient3","nutrient4")
+      total_nutrients_df <- as.data.frame(total_nutrients_df())
+      
+      table$total_value <- rep(0, nrow(table))
+      
+      for (i in 1:nrow(table)) {
+        match_rows <- total_nutrients_df %>% 
+          filter(nutrient == table$nutrient[i] | 
+                   nutrient == table$nutrient2[i] | 
+                   nutrient == table$nutrient3[i] | 
+                   nutrient == table$nutrient4[i]) %>%
+          select(total_value)
+        
+        if (length(match_rows) > 0) {
+          table$total_value[i] <- match_rows$total_value[1]
+        }
+      }
       
       
-      Protein <- daily_intake %>% filter(Type == "Protein" & (Gender==input$gender | Gender == "Both"))
+      table$"Average Daily Intake" <- as.numeric(table$"Average Daily Intake")
+      table$"Min Daily Intake" <- as.numeric(table$"Min Daily Intake")
+      table$"Max Daily Intake" <- as.numeric(table$"Max Daily Intake")
+      table$total_value <- ifelse(is.na(table$total_value),0,table$total_value)
       
-      Protein <- merge(Protein,total_nutrients_df(), by="nutrient", all.x=TRUE)
-      Protein$"Average Daily Intake" <- as.numeric(Protein$"Average Daily Intake")
-      Protein$"Min Daily Intake" <- as.numeric(Protein$"Min Daily Intake")
-      Protein$"Max Daily Intake" <- as.numeric(Protein$"Max Daily Intake")
-      Protein$total_value <- as.numeric(ifelse(is.na(Protein$total_value),0,Protein$total_value))
       
-      Protein$percentage <- ifelse(is.na(Protein$"Average Daily Intake"),Protein$total_value , round(Protein$total_value / (Protein$"Average Daily Intake") * 100,1))
-      Protein$white <- ifelse(Protein$percentage < 100, 100 - Protein$percentage, 0)
-      Protein$full_percentage <- ifelse(Protein$percentage > 100, 100, Protein$percentage)
+      table$percentage <- ifelse(is.na(table$"Average Daily Intake"),table$total_value , round(table$total_value / (table$"Average Daily Intake") * 100,1))
       
-      Protein$red <- 0
-      Protein$red[Protein$total_value >= Protein$`Max Daily Intake` & !is.na(Protein$`Max Daily Intake`)] <- Protein$full_percentage[Protein$total_value >= Protein$`Max Daily Intake`& !is.na(Protein$`Max Daily Intake`)]
-      Protein$yellow <- 0
-      Protein$yellow[Protein$total_value <= Protein$`Min Daily Intake` & !is.na(Protein$`Min Daily Intake`)] <- Protein$full_percentage[Protein$total_value <= Protein$`Min Daily Intake`& !is.na(Protein$`Min Daily Intake`)]
-     
-      Protein$green <- ifelse(Protein$yellow == 0 & Protein$red == 0, Protein$full_percentage, 0)
-      ##Protein$text <- ifelse(Protein$white == 100, "0%",paste0(max(Protein$red, Protein$yellow, Protein$green), "%"))
+      colours <-  table %>%
+        mutate(
+          colours = case_when(
+            `total_value` >= as.numeric(`Max Daily Intake`) & !is.na(`Max Daily Intake`) ~ "red",
+            `total_value` < as.numeric(`Min Daily Intake`) & !is.na(`Min Daily Intake`)  ~ "yellow",
+            TRUE ~ "#00FF00"
+          )
+        ) %>%
+        pull(colours)
       
-      Protein <- pivot_longer(Protein, 
-                              cols = c("green", "yellow", "red", "white"),
-                              names_to = "type",
-                              values_to = "value")
+      table$colours <- colours
+      table$total_value <- paste0(table$total_value, table$`Unit Name`)
+      table <- as.data.frame(table)
       
-    Protein$text <- rep(" ", nrow(Protein))
-     Protein$text[Protein$type == "white"] <- " "
-     Protein$text[Protein$value != 0 & Protein$type != "white"] <- paste0(Protein$percentage[Protein$value != 0 & Protein$type != "white"], "%")
-     Protein$text[lag(Protein$value) == 0 & lead(Protein$value) == 0 & Protein$value == 0 & Protein$type == "yellow"] <- "0%"
-     
+      table <- table[,c("nutrient_skrajsano", "total_value", "percentage")]
+      print(table)
+      
+      reactable(
+        table,
+        columns = list(
+          nutrient_skrajsano = colDef(name = "PROTEINS", width = 120),
+          total_value = colDef(name = "Quantity", align = "right", width = 80, cell = function(value) {
+            value
+          }),
+          percentage = colDef(name = "Daily target (%)", align = "left", cell = function(value, rowIndex) {
+            width <- paste0(ifelse(value > 100, 100, value), "%")
+            color <- colours[rowIndex]
+            bar_chart(paste0(value, "%"), width = width, color = color, background = "#e1e1e1")
+          })
+        )
+      )
+    }})
+  
+  
  
-   
- Protein <- as.data.frame(Protein)
- Protein$type <- factor(Protein$type, levels = c("white","green","yellow", "red"))
-    plot<-ggplot(Protein, aes(x = nutrient_skrajsano, y = value, fill = type)) + 
-      geom_bar(stat = "identity") +
-      coord_flip()+
-      geom_text(aes(label = text))+
-     
-      scale_fill_manual(values = c("green" = "green", "yellow" = "yellow", "red"="red", "white"= "white"), guide="none")+
-      theme(axis.text.x = element_blank(),
-                       axis.title.x = element_blank(),
-                        axis.title.y = element_blank()) 
-                
-      
-
-  #    
-      return(plot)
-    }
-  })
 }
   
   

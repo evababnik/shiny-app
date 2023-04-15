@@ -17,7 +17,7 @@ library(eurostat)
 library(sf)
 library(leaflet)
 
-
+library(gridExtra)
 library(reshape2)
 source("analiza_cista2.R")
 ##########################
@@ -56,24 +56,25 @@ ui <- navbarPage(
                           
                           
                  
-                 tabPanel("Analyzed Nutrients",
+                 tabPanel("Analyzed Nutrients", 
                           fluidRow(
-                            column(width = 4, plotOutput("general_plot")),
-                            column(width = 4, plotOutput("minerals_plot"))
-                            
-                          ),
-                          fluidRow(
-                            column(width = 4, plotOutput("vitamins_plot")),
-                            column(width = 4, plotOutput("Protein_plot"))
-                            
-                          ),
-                          fluidRow(
-                            
-                            column(width = 4, plotOutput("lipids_plot")),
-                            column(width = 4, plotOutput("carbohydrate_plot"))
+                            column(width = 6,
+                                   tagList(
+                                     reactableOutput("general_plot"), 
+                                     reactableOutput("vitamins_plot"),
+                                     reactableOutput("lipids_plot")
+                                   )
+                            ),
+                            column(width = 6,
+                                   tagList(
+                                     reactableOutput("minerals_plot"),
+                                     reactableOutput("Protein_plot"),
+                                     reactableOutput("carbohydrate_plot")
+                                   )
+                            )
                           )
-                          
                  )
+                 
                  
                
              )))),

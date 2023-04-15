@@ -45,3 +45,11 @@ get_foods <- function(query) {
   
   return(foods)
 }
+
+bar_chart <- function(label, value, width = "100%", height = "1rem", color = "#00bfc4", background = NULL) {
+  label_div <- div(style = list(position = "absolute", left = "90%", top = "50%", transform = "translate(-50%, -50%)"), label)
+  bar <- div(style = list(position = "relative", background = color, width = width, height = height), label_div)
+  chart <- div(style = list(flexGrow = 1, marginLeft = "0.5rem", background = background), bar)
+  div(style = list(display = "flex", alignItems = "center"), chart)
+}
+
