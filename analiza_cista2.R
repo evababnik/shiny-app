@@ -63,5 +63,13 @@ tabela2 <- function(podatki, nutrient) {
   
   return(podatki)
 }
-ss <- naredi_zemljevid(country, 'Alpha-tocopherol')
+
+#____________________________
+
+un <- FCD %>% select('NUTRIENT_TEXT', 'UNIT')
+un <- unique(un)
+
+
+
+
 

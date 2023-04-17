@@ -85,7 +85,8 @@ ui <- navbarPage(
              )))),
   
   tabPanel('Analysis', icon = icon("table"),
-             selectInput("var2", "Choose nutrient", nutrienti_vsi2),
+            selectInput("var2", "Choose nutrient", nutrienti_vsi2, width="500px"),
+           textOutput("unit1"),
             tmapOutput("map2"),
             reactableOutput('table2')
   )

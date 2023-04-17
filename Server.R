@@ -95,6 +95,15 @@ source("analiza_cista2.R")
               defaultPageSize = 30
     )
   })
+  
+  output$unit1 <- renderText({ 
+    var <- input$var2
+    u <- un[un$NUTRIENT_TEXT == var, 2]
+    paste('Unit:', u)
+    })
+  
+  # _____________________________________ CALCULATOR ________________________________________
+  
   # reagiraj na spremembe v iskalnem nizu
   recommended_foods <- reactive({
     query <- input$food_query
@@ -215,7 +224,8 @@ source("analiza_cista2.R")
   })
   
   
-  
+
+  #______________________________________________________________________________________________________________________________
   
   ##pokazi grafe za glavne hranilne snovi
   
