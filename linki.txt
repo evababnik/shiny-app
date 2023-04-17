@@ -1,0 +1,3 @@
+https://fdc.nal.usda.gov/download-datasets.html 
+https://data.europa.eu/data/datasets/food-composition-database?locale=en
+https://www.efsa.europa.eu/en/microstrategy/food-composition-data 

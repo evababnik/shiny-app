@@ -38,8 +38,26 @@ source("analiza_cista2.R")
 server <- function(input, output, session) {
 source("calculator.R")
 source("analiza_cista2.R")
-ss <- naredi_zemljevid(country, 'Alpha-tocopherol')
+  FCD <- read_excel("Food_composition_dataset.xlsx")
+  
+  drzave <- data.frame(
+    imena = c('Italy', 'Finland', 'France', 'Germany', 'Netherlands', 'Sweden', 'United Kingdom'),
+    kratice = c('IT', 'FI', 'FR', 'DE', 'NL', 'SE', 'UK'))
+  
+  country <- FCD %>% group_by(COUNTRY, NUTRIENT_TEXT, level1, level2)%>% summarize(mean_nutri = mean(LEVEL)) %>%
+    left_join(drzave, by = c('COUNTRY'= 'imena'))
+  
+  
+  nutrienti_vsi2 <- unique(country$NUTRIENT_TEXT)
+  
+  SHP_0 <- get_eurostat_geospatial(resolution = 10, 
+                                   nuts_level = 0, 
+                                   year = 2016)
+  
+  ss <- naredi_zemljevid(country, 'Alpha-tocopherol')
 
+  
+  
   output$map2 <- renderTmap({
     tm_shape(ss, bbox = c(-15, 45, 45, 50)) +
       tm_polygons(col = "mean_value", border.col = "black", lwd = 0.5, zindex = 401)
@@ -67,9 +85,15 @@ ss <- naredi_zemljevid(country, 'Alpha-tocopherol')
               resizable = TRUE,
               compact = TRUE,
               details = function(index) {
-                coun <- tab2 %>% filter(level1 == tab1$level1[index])
-                return(reactable(coun,  highlight = TRUE))
-              })
+                coun <- tab2 %>% filter(level1 == tab1$level1[index]) 
+                coun2 <- coun  %>% data.frame() %>% select(-c('level1'))
+                tbl <- reactable(coun2, outlined = TRUE, highlight = TRUE, fullWidth = TRUE)
+                htmltools::div(style = list(margin = "12px 100px"), tbl)
+              },
+              onClick = "expand",
+              rowStyle = list(cursor = "pointer"),
+              defaultPageSize = 30
+    )
   })
   # reagiraj na spremembe v iskalnem nizu
   recommended_foods <- reactive({

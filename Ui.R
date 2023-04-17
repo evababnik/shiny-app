@@ -28,15 +28,20 @@ ui <- navbarPage(
   
   "Nutrition Calculator",
   
-  tabPanel('Domov', icon = icon("home"),
-           h2("Food composition in some EU countries"),
-           p("Na zavihku Domov se nahajajo navodila za uporabo aplikacije in njeno delovanje, na prvo stran se lahko shranjuje tudi 
-             dnevne podatke o zavžitih kalorijah"),
-           p("Na zavihku Kalkulator..."),
-           p("Na zavihku Analiza je na voljo zemljevid in tabela z nivojem 1 in 2 živil, ki vsebujejo izbrani nutrient")
+  tabPanel('Home', icon = icon("home"),
+           HTML("
+           <h5>Calculator tab</h5>
+           <p>It's intended for food intake, calculation of calories and nutrients, and analysis of daily nutrient intake. All food data on this tab is calculated from <a href='https://fdc.nal.usda.gov/download-datasets.html'>this API address</a>. Due to the huge data set, it is necessary to enter a search string when entering the food, based on which the offered set options are displayed.</p>
+           <p>At the top of the page there are 4 infoboxes with the most important information about the total daily intake (calories value, amount of carbohydrates, proteins and fats), the food intake module is displayed on the left side, and the food intake table is written below. The main part is divided into two parts, which are separated as tabs:</p>
+           <ol>
+           <li>In the first tab (Nutritional Information), there are two tables. The first shows the nutritional value and energy value of the food entered in the left search module. The table is automatically recalculated according to the selected parameters in the module. The second has calculated nutrients of the total daily intake.</li>
+           <li>In the second tab (Analyzed nutrients), there is an analysis of the daily intake of nutrients. The graphs are colored differently according to the daily recommended nutrient intake____.</li>
+           </ol>
+           <h5>Analysis tab</h5>
+           <p>It's intended for the analysis of nutrients by country in each food at the first and second level according to the classification found on <a href='https://data.europa.eu/data/datasets/food-composition-database?locale=en'>this page</a>. Also, on this page there is an accessible file in excel format from which we draw data. The countries for which the data are selected are displayed on the map. In the table below, we can see more detailed data for the first and second level of food.</p>")
   ),
   
-  tabPanel('kalkulator', icon = icon("calculator"),
+  tabPanel('Calculator', icon = icon("calculator"),
            sidebarLayout(
              sidebarPanel(textInput("food_query", label = "Search for a food", placeholder = "Enter a food name..."),
                           verbatimTextOutput("recommended_foods"),
@@ -79,8 +84,8 @@ ui <- navbarPage(
                
              )))),
   
-  tabPanel('Analiza', icon = icon("table"),
-             selectInput("var2", "Variable2", nutrienti_vsi2),
+  tabPanel('Analysis', icon = icon("table"),
+             selectInput("var2", "Choose nutrient", nutrienti_vsi2),
             tmapOutput("map2"),
             reactableOutput('table2')
   )
