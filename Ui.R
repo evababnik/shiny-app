@@ -19,7 +19,7 @@ library(leaflet)
 
 library(gridExtra)
 library(reshape2)
-source("analiza_cista2.R")
+source("analiza.R")
 ##########################
 ##### User interface #####
 ##########################

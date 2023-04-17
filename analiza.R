@@ -7,17 +7,13 @@ library(bslib)
 library(tmap)
 library(reactable)
 library(shiny)
-
-
-
 library(readxl)
 library(eurostat)
 library(sf)
 library(leaflet)
-
-
 library(reshape2)
 
+# UVOZ PODATKOV
 
 FCD <- read_excel("Food_composition_dataset.xlsx")
 
@@ -28,13 +24,13 @@ drzave <- data.frame(
 country <- FCD %>% group_by(COUNTRY, NUTRIENT_TEXT, level1, level2)%>% summarize(mean_nutri = mean(LEVEL)) %>%
   left_join(drzave, by = c('COUNTRY'= 'imena'))
 
-
 nutrienti_vsi2 <- unique(country$NUTRIENT_TEXT)
 
-SHP_0 <- get_eurostat_geospatial(resolution = 10, 
-                                 nuts_level = 0, 
+SHP_0 <- get_eurostat_geospatial(resolution = 10,
+                                 nuts_level = 0,
                                  year = 2016)
 
+# FUNKCIJE (zemljevid, tabela level 1, tabela level 2)
 
 naredi_zemljevid <- function(podatki, nutrient) {
   podatki <- podatki %>% group_by(COUNTRY, kratice, NUTRIENT_TEXT) %>% summarize(mean_value = mean(mean_nutri)) %>%
@@ -64,7 +60,7 @@ tabela2 <- function(podatki, nutrient) {
   return(podatki)
 }
 
-#____________________________
+# NUTRIENTS UNITS
 
 un <- FCD %>% select('NUTRIENT_TEXT', 'UNIT')
 un <- unique(un)

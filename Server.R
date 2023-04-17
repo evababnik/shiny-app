@@ -28,7 +28,7 @@ library(sf)
 library(reshape2)
 library(htmltools)
 source("calculator.R")
-source("analiza_cista2.R")
+source("analiza.R")
 
 
 
@@ -36,73 +36,10 @@ source("analiza_cista2.R")
 ##### Server function #####
 ###########################
 server <- function(input, output, session) {
-source("calculator.R")
-source("analiza_cista2.R")
-  FCD <- read_excel("Food_composition_dataset.xlsx")
-  
-  drzave <- data.frame(
-    imena = c('Italy', 'Finland', 'France', 'Germany', 'Netherlands', 'Sweden', 'United Kingdom'),
-    kratice = c('IT', 'FI', 'FR', 'DE', 'NL', 'SE', 'UK'))
-  
-  country <- FCD %>% group_by(COUNTRY, NUTRIENT_TEXT, level1, level2)%>% summarize(mean_nutri = mean(LEVEL)) %>%
-    left_join(drzave, by = c('COUNTRY'= 'imena'))
-  
-  
-  nutrienti_vsi2 <- unique(country$NUTRIENT_TEXT)
-  
-  SHP_0 <- get_eurostat_geospatial(resolution = 10, 
-                                   nuts_level = 0, 
-                                   year = 2016)
-  
-  ss <- naredi_zemljevid(country, 'Alpha-tocopherol')
 
-  
-  
-  output$map2 <- renderTmap({
-    tm_shape(ss, bbox = c(-15, 45, 45, 50)) +
-      tm_polygons(col = "mean_value", border.col = "black", lwd = 0.5, zindex = 401)
-  })
-
-  observe({
-    var <- input$var2
-    zem <- naredi_zemljevid(country, var)
-    
-    tmapProxy("map2", session, {
-      tmap_mode("view")
-      tm_remove_layer(401) +
-        tm_shape(zem, bbox = c(-15, 45, 45, 50)) +
-        tm_polygons(col = "mean_value", border.col = "black", lwd = 0.5, zindex = 401) +
-        tm_fill( popup.vars=c('NUTRIENT_TEXT', 'mean_value'))
-    })
-  })
-
-  output$table2 <- renderReactable ({
-    var <- input$var2
-    tab1 <- tabela1(country, var) 
-    tab2 <- tabela2(country, var)
-    reactable(tab1,
-              filterable = TRUE,
-              resizable = TRUE,
-              compact = TRUE,
-              details = function(index) {
-                coun <- tab2 %>% filter(level1 == tab1$level1[index]) 
-                coun2 <- coun  %>% data.frame() %>% select(-c('level1'))
-                tbl <- reactable(coun2, outlined = TRUE, highlight = TRUE, fullWidth = TRUE)
-                htmltools::div(style = list(margin = "12px 100px"), tbl)
-              },
-              onClick = "expand",
-              rowStyle = list(cursor = "pointer"),
-              defaultPageSize = 30
-    )
-  })
-  
-  output$unit1 <- renderText({ 
-    var <- input$var2
-    u <- un[un$NUTRIENT_TEXT == var, 2]
-    paste('Unit:', u)
-    })
-  
   # _____________________________________ CALCULATOR ________________________________________
+
+  source("calculator.R")
   
   # reagiraj na spremembe v iskalnem nizu
   recommended_foods <- reactive({
@@ -488,9 +425,6 @@ output$lipids_plot <- renderReactable({
   }})
 
 
-  
-  
-  
   ###Carbohydrate
   output$carbohydrate_plot <- renderReactable({
     if(!is.null(added_foods$data)){
@@ -621,8 +555,75 @@ output$lipids_plot <- renderReactable({
       )
     }})
   
+  #____________________________________________ ANALYSIS (MAP AND TABLE) ____________________________________
   
- 
+  source("analiza.R")
+  
+  FCD <- read_excel("Food_composition_dataset.xlsx")
+
+  #-------------------------------------------------
+  # ta del se ponovi iz analiza.R, sicer ne naloži zemljevida
+  
+  drzave <- data.frame(
+    imena = c('Italy', 'Finland', 'France', 'Germany', 'Netherlands', 'Sweden', 'United Kingdom'),
+    kratice = c('IT', 'FI', 'FR', 'DE', 'NL', 'SE', 'UK'))
+
+  country <- FCD %>% group_by(COUNTRY, NUTRIENT_TEXT, level1, level2)%>% summarize(mean_nutri = mean(LEVEL)) %>%
+    left_join(drzave, by = c('COUNTRY'= 'imena'))
+
+  nutrienti_vsi2 <- unique(country$NUTRIENT_TEXT)
+
+  SHP_0 <- get_eurostat_geospatial(resolution = 10,
+                                   nuts_level = 0,
+                                   year = 2016)
+  #--------------------------------------------------
+  
+  ss <- naredi_zemljevid(country, 'Alpha-tocopherol')
+  
+  output$map2 <- renderTmap({
+    tm_shape(ss, bbox = c(-15, 45, 45, 50)) +
+      tm_polygons(col = "mean_value", border.col = "black", lwd = 0.5, zindex = 401)
+  })
+  
+  observe({
+    var <- input$var2
+    zem <- naredi_zemljevid(country, var)
+    
+    tmapProxy("map2", session, {
+      tmap_mode("view")
+      tm_remove_layer(401) +
+        tm_shape(zem, bbox = c(-15, 45, 45, 50)) +
+        tm_polygons(col = "mean_value", border.col = "black", lwd = 0.5, zindex = 401) +
+        tm_fill( popup.vars=c('NUTRIENT_TEXT', 'mean_value'))
+    })
+  })
+  
+  output$table2 <- renderReactable ({
+    var <- input$var2
+    tab1 <- tabela1(country, var) 
+    tab2 <- tabela2(country, var)
+    reactable(tab1,
+              filterable = TRUE,
+              resizable = TRUE,
+              compact = TRUE,
+              details = function(index) {
+                coun <- tab2 %>% filter(level1 == tab1$level1[index]) 
+                coun2 <- coun  %>% data.frame() %>% select(-c('level1'))
+                tbl <- reactable(coun2, outlined = TRUE, highlight = TRUE, fullWidth = TRUE)
+                htmltools::div(style = list(margin = "12px 100px"), tbl)
+              },
+              onClick = "expand",
+              rowStyle = list(cursor = "pointer"),
+              defaultPageSize = 30
+    )
+  })
+  
+  output$unit1 <- renderText({ 
+    var <- input$var2
+    u <- un[un$NUTRIENT_TEXT == var, 2]
+    paste('Unit:', u)
+  })
+  
 }
   
   
