@@ -135,16 +135,7 @@ source("analiza_cista2.R")
   # add food to the 'food_table'
   observeEvent(input$add_food, {
     if (input$food_name != "" & input$quantity != "") {
-      food <- get_foods(input$food_name)[[1]]
-      nutrients <- food$foodNutrients
-      nutrients_df <- data.frame(
-        nutrient = sapply(nutrients, function(x) x$nutrientName),
-        value = sapply(nutrients, function(x) x$value),
-        unit = sapply(nutrients, function(x) x$unitName),
-        stringsAsFactors = FALSE    )
-      nutrients_df$value <- nutrients_df$value * (as.numeric(input$quantity)/ 100)
-      nutrients_df$value <- round(nutrients_df$value, digits = 2)
-      
+      nutrients_df <- vnos_tabela(input$food_name, input$quantity)
       
     
       new_row <- data.frame(food_name = input$food_name, quantity = as.numeric(input$quantity), stringsAsFactors = FALSE)
@@ -214,18 +205,12 @@ source("analiza_cista2.R")
   # prikaži tabelo z vrednostmi hranilnih snovi za posamezno izbrano hrano
   output$nutrition_table <- renderTable({
     if (input$food_name != "") {
-      food <- get_foods(input$food_name)[[1]]
-      nutrients <- food$foodNutrients
-      nutrients_df <- data.frame(
-        nutrient = sapply(nutrients, function(x) x$nutrientName),
-        value = sapply(nutrients, function(x) x$value),
-        unit = sapply(nutrients, function(x) x$unitName),
-        stringsAsFactors = FALSE
-      )
-      nutrients_df$value <- nutrients_df$value * (as.numeric(input$quantity)/ 100)
-      nutrients_df$value <- round(nutrients_df$value, digits = 2)
+      nutrients_df <- vnos_tabela(input$food_name, input$quantity)
       nutrients_df <- nutrients_df %>% arrange(desc(value))
-      return(nutrients_df)
+      
+      ostalo <- nutrients_df %>% filter(!nutrient %in% c('Energy', 'Protein', 'Total lipid (fat)', 'Carbohydrate, by difference'))
+      
+      return(ostalo)
     }
   })
   

@@ -53,3 +53,19 @@ bar_chart <- function(label, value, width = "100%", height = "1rem", color = "#0
   div(style = list(display = "flex", alignItems = "center"), chart)
 }
 
+vnos_tabela <- function(vnos, kol) {
+  food <- get_foods(vnos)[[1]]
+  nutrients <- food$foodNutrients
+  nutrients_df <- data.frame(
+    nutrient = sapply(nutrients, function(x) x$nutrientName),
+    value = sapply(nutrients, function(x) x$value),
+    unit = sapply(nutrients, function(x) x$unitName),
+    stringsAsFactors = FALSE
+  )
+  nutrients_df$value <- nutrients_df$value * (as.numeric(kol)/ 100)
+  nutrients_df$value <- round(nutrients_df$value, digits = 2) 
+  nutrients_df <- nutrients_df %>% arrange(desc(value))
+  
+  return(nutrients_df)
+}
+
