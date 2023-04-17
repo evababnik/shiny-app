@@ -27,6 +27,11 @@ library(bslib)
 library(sf)
 library(reshape2)
 library(htmltools)
+library(htmltools)
+library(shinymanager)
+library(fontawesome)
+remotes::install_github("deepanshu88/summaryBox")
+library(summaryBox)
 source("calculator.R")
 source("analiza.R")
 
@@ -145,18 +150,18 @@ server <- function(input, output, session) {
       return(total_nutrients_df)} })
     
     
-  output$total_nutrients_table <- renderTable({
+  output$total_nutrients_table <- DT::renderDataTable({
     total_nutrients_df()  })
   
   # prikaži tabelo z vrednostmi hranilnih snovi za posamezno izbrano hrano
-  output$nutrition_table <- renderTable({
+  output$nutrition_table <- DT::renderDataTable({
     if (input$food_name != "") {
       nutrients_df <- vnos_tabela(input$food_name, input$quantity)
       nutrients_df <- nutrients_df %>% arrange(desc(value))
       
-      ostalo <- nutrients_df %>% filter(!nutrient %in% c('Energy', 'Protein', 'Total lipid (fat)', 'Carbohydrate, by difference'))
+      #ostalo <- nutrients_df %>% filter(!nutrient %in% c('Energy', 'Protein', 'Total lipid (fat)', 'Carbohydrate, by difference'))
       
-      return(ostalo)
+      return(nutrients_df)
     }
   })
   
@@ -213,12 +218,12 @@ server <- function(input, output, session) {
       table <- as.data.frame(table)
       
       table <- table[,c("nutrient_skrajsano", "total_value", "percentage")]
-      print(table)
+     
       
       reactable(
         table,
         columns = list(
-          nutrient_skrajsano = colDef(name = "MINERALS", width = 120),
+          nutrient_skrajsano = colDef(name = "MINERALS", width = 130),
           total_value = colDef(name = "Quantity", align = "right", width = 80, cell = function(value) {
             value
           }),
@@ -283,7 +288,7 @@ server <- function(input, output, session) {
       reactable(
         table,
         columns = list(
-          nutrient_skrajsano = colDef(name = "VITAMINS", width = 120),
+          nutrient_skrajsano = colDef(name = "VITAMINS", width = 130),
           total_value = colDef(name = "Quantity", align = "right", width = 80, cell = function(value) {
             value
           }),
@@ -347,7 +352,7 @@ server <- function(input, output, session) {
       reactable(
         table,
         columns = list(
-          nutrient_skrajsano = colDef(name = "GENERAL", width = 120),
+          nutrient_skrajsano = colDef(name = "GENERAL", width = 130),
           total_value = colDef(name = "Quantity", align = "right", width = 80, cell = function(value) {
             value
           }),
@@ -411,7 +416,17 @@ output$lipids_plot <- renderReactable({
     reactable(
       table,
       columns = list(
-        nutrient_skrajsano = colDef(name = "LIPIDS", width = 120),
+        nutrient_skrajsano = colDef(
+          name = "LIPIDS", 
+          width = 130, 
+          cell = function(value) {
+            if (value == "Total lipid" | value == "Total fat") {
+              tags$b(value, style = "font-weight:bold;")
+            } else {
+              tags$span(style = "padding-left: 10px;", value)
+            }
+          }
+        ),
         total_value = colDef(name = "Quantity", align = "right", width = 80, cell = function(value) {
           value
         }),
@@ -471,12 +486,24 @@ output$lipids_plot <- renderReactable({
       table <- as.data.frame(table)
       
       table <- table[,c("nutrient_skrajsano", "total_value", "percentage")]
-      print(table)
+      table <- table %>% 
+        arrange(desc(nutrient_skrajsano == "Carbohydrates"), nutrient_skrajsano)
       
       reactable(
         table,
         columns = list(
-          nutrient_skrajsano = colDef(name = "CARBOHYDRATES", width = 120),
+          nutrient_skrajsano = colDef(
+            name = "CARBOHYDRATES", 
+            width = 130, 
+            cell = function(value) {
+              if (value == "Carbohydrates") {
+                tags$b(value, style = "font-weight:bold;")
+              } else {
+                tags$span(style = "padding-left: 10px;", value)
+              }
+            }
+          ),
+          
           total_value = colDef(name = "Quantity", align = "right", width = 80, cell = function(value) {
             value
           }),
@@ -542,7 +569,17 @@ output$lipids_plot <- renderReactable({
       reactable(
         table,
         columns = list(
-          nutrient_skrajsano = colDef(name = "PROTEINS", width = 120),
+          nutrient_skrajsano = colDef(
+            name = "PROTEINS", 
+            width = 130, 
+            cell = function(value) {
+              if (value == "Protein") {
+                tags$b(value, style = "font-weight:bold;")
+              } else {
+                tags$span(style = "padding-left: 10px;", value)
+              }
+            }
+          ),
           total_value = colDef(name = "Quantity", align = "right", width = 80, cell = function(value) {
             value
           }),
@@ -622,6 +659,72 @@ output$lipids_plot <- renderReactable({
     var <- input$var2
     u <- un[un$NUTRIENT_TEXT == var, 2]
     paste('Unit:', u)
+  })
+  
+  
+  output$caloriesBox <- renderValueBox({
+    value <- sum(as.data.frame(total_nutrients_df())[as.data.frame(total_nutrients_df())$nutrient %in% c("Energy", "Energy (kcal)"), "total_value"])
+    color <- ifelse(value <= 1600 & input$gender == "Female","warning",
+                    ifelse(value <= 2400 & input$gender == "Female", "success", 
+                           ifelse(value > 2400 & input$gender == "Female","danger",
+                                  ifelse(value <= 2000 & input$gender == "Male","warning",
+                                         ifelse(value <= 3000 & input$gender == "Male", "success",
+                                                "danger")))))
+    
+    (summaryBox2( 'Calories',
+                  paste0(value, " kcal"),
+                  
+                  icon = "fas fa-fire",
+                  style = color
+    ))
+    
+  })
+  
+  output$carbohydrateBox <- renderValueBox({
+    value <- sum(as.data.frame(total_nutrients_df())[grep("^Carbohydrate", as.data.frame(total_nutrients_df())$nutrient), "total_value"])
+    color <- ifelse(value <= 130, "warning", ifelse(value <= 325, "success","danger"))
+    
+    (summaryBox2('Carbohydrates',
+                 paste0(value, " g"),
+                 
+                 icon = "fas fa-wheat-awn",
+                 style = color
+    ))
+  })
+  
+  
+  output$proteinBox <- renderValueBox({
+    value <- sum(as.data.frame(total_nutrients_df())[as.data.frame(total_nutrients_df())$nutrient %in% c("Protein", "Adjusted Protein"), "total_value"])
+    color <- ifelse(value <= 46 & input$gender == "Female", "warning",
+                    ifelse(value <= 112 & input$gender == "Female","success", 
+                           ifelse(value > 112 & input$gender == "Female","danger",
+                                  ifelse(value <= 56 & input$gender == "Male","warning",
+                                         ifelse(value <= 168 & input$gender == "Male", "success",
+                                                "danger")))))
+    
+    (summaryBox2('Proteins',
+                 paste0(value, " g"),
+                 
+                 icon = "fas fa-egg",
+                 style = color
+                 
+    ))
+  })
+  
+  
+  
+  
+  
+  output$lipidBox <- renderValueBox({
+    value <- sum(as.data.frame(total_nutrients_df())[as.data.frame(total_nutrients_df())$nutrient %in% c("Total lipid (fat)", "Lipids"), "total_value"])
+    color <- ifelse(value <= 20, "warning", ifelse(value <= 150, "success", "danger"))
+    
+    div(summaryBox2('Lipids',
+                    paste0(value, " g"),
+                    
+                    icon = "fas fa-cheese",
+                    style = color, width = 20)
+    )
   })
   
 }
