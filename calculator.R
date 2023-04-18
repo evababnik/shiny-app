@@ -27,10 +27,14 @@ library(bslib)
 library(sf)
 library(reshape2)
 
+library(readr)
+daily_intake <- read_delim("rdv.csv", delim = ";", 
+                  escape_double = FALSE, trim_ws = TRUE)
+daily_intake$`Min Daily Intake` <- as.numeric(daily_intake$`Min Daily Intake`)
+daily_intake$`Average Daily Intake` <- as.numeric(daily_intake$`Average Daily Intake`)
+daily_intake$`Max Daily Intake` <- as.numeric(daily_intake$`Max Daily Intake`)
 
-
-
-daily_intake <-  read_excel("rdv.xlsx")
+#daily_intake <-  read_excel("rdv.xlsx")
 
 
 # funkcija za poizvedbo API-ja
@@ -69,3 +73,49 @@ vnos_tabela <- function(vnos, kol) {
   return(nutrients_df)
 }
 
+###summary boxi
+loadFontAwesome <- function() {
+  
+  list(
+    
+    # Font Awesome
+    htmltools::htmlDependency(name = "font-awesome",
+                              version = "5.13.0",
+                              src = "fontawesome",
+                              package = "fontawesome",
+                              stylesheet = c("css/all.min.css", "css/v4-shims.min.css")),
+    
+    # Custom CSS
+    htmltools::htmlDependency(
+      name = "summarybox-style",
+      version = "0.1.0",
+      src = "css",
+      package = "summaryBox",
+      stylesheet = "style.css"
+    )
+    
+  )
+  
+}
+summaryBox2 <- function(title, value, width = 4, icon = "fas fa-chart-bar", style = "info") {
+  
+  valuetag  <- tags$div(
+    class = paste0("col-md-", width),
+    tags$div(
+      class = paste("card-counter", style),
+      tags$i(class = icon),
+      tags$span(
+        class = "count-numbers",
+        value
+      ),
+      tags$span(
+        class = "count-name",
+        title
+      )
+    )
+  )
+  
+  htmltools::htmlDependencies(valuetag) <- loadFontAwesome()
+  htmltools::browsable(valuetag)
+  
+}

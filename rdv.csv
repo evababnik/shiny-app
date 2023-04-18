@@ -1,0 +1,68 @@
+nutrient;nutrient2;nutrient3;nutrient4;Unit Name;Gender;Min Daily Intake;Average Daily Intake;Max Daily Intake;Type;nutrient_skrajsano
+Protein;Adjusted Protein;;;G;Male;56;84;168;Protein;Protein
+Protein;Adjusted Protein;;;G;Female;46;64;112;Protein;Protein
+Total lipid (fat);Lipids;;;G;Both;20;78;150;Lipids;Total lipid 
+Fiber, total dietary;Fiber, soluble;Fiber, insoluble;Total dietary fiber (AOAC 2011.25);G;Male;38;38;50;Carbohydrate;Fiber
+Fiber, total dietary;Fiber, soluble;Fiber, insoluble;Total dietary fiber (AOAC 2011.25);G;Female;25;25;50;Carbohydrate;Fiber
+Glucose;;;;G;Both;;;;Carbohydrate;Glucose
+Fructose;;;;G;Both;;;50;Carbohydrate;Fructose
+Lactose;;;;G;Both;;;20;Carbohydrate;Lactose
+Maltose;;;;G;Both;;;;Carbohydrate;Maltose
+Carbohydrates;Carbohydrate, by difference;Carbohydrate, other;;G;Both;130;225;325;Carbohydrate;Carbohydrates
+Sugars, Total;Sugars, Total NLEA;Sugars, added;Sugars, total including NLEA;G;Female;;;24;Carbohydrate;Sugars
+Sugars, Total;Sugars, Total NLEA;Sugars, added;Sugars, total including NLEA;G;Male;;;36;Carbohydrate;Sugars
+Total fat (NLEA);;;;G;Both;;75;;Lipids;Total fat 
+Calcium, Ca;Calcium, added;;;MG;Both;1000;1000;2500;Mineral;Calcium
+Magnesium, Mg;Magnesium;;;MG;Male;350;400;420;Mineral;Magnesium
+Magnesium, Mg;Magnesium;;;MG;Female;280;320;360;Mineral;Magnesium
+Phosphorus, P;;;;MG;Both;700;1000;4000;Mineral;Phosphorus
+Potassium, K;;;;MG;Both;2000;2800;4700;Mineral;Potassium
+Sodium, Na;;;;MG;Both;1200;2300;2300;Mineral;Sodium
+Zinc, Zn;;;;MG;Male;11;11;40;Mineral;Zinc
+Zinc, Zn;;;;MG;Female;8;8;30;Mineral;Zinc
+Copper, Cu;;;;MG;Both;0,9;1,5;10;Mineral;Copper
+Manganese, Mn;;;;MG;Both;2,3;2,3;11;Mineral;Manganese
+Selenium, Se;;;;UG;Both;55;70;400;Mineral;Selenium
+Vitamin A, RAE;;;;UG;Male;;3000;;Vitamin;Vitamin A, RAE
+Vitamin A, RAE;;;;UG;Female;;2333;;Vitamin;Vitamin A, RAE
+Vitamin A, RE;;;;MCG_RE;Male;;900;;Vitamin;Vitamin A, RE
+Vitamin A, RE;;;;MCG_RE;Female;;700;;Vitamin;Vitamin A, RE
+Vitamin A, IU;;;;IU;Both;900;800;3000;Vitamin;Vitamin A, IU
+Vitamin D (D2 + D3);;;;IU;Both;600;700;4000;Vitamin;Vitamin D 
+Vitamin C, total ascorbic acid;;;;MG;Both;90;90;2000;Vitamin;Vitamin C
+Thiamin;;;;MG;Both;0,5;1,2;;Vitamin;Thiamin
+Niacin;;;;MG;Both;6,6;14;35;Vitamin;Niacin
+Pantothenic acid;;;;MG;Both;5;5;;Vitamin;Pantothenic acid
+Vitamin B-6;;;;MG;Both;1,3;1,7;100;Vitamin;Vitamin B-6
+Biotin;;;;UG;Both;30;30;;Vitamin;Biotin
+Folate, total;;;;UG;Both;400;60;1000;Vitamin;Folate
+Vitamin B-12;;;;UG;Both;2,4;2,4;;Vitamin;Vitamin B-12
+Choline, total;;;;MG;Male;550;550;3500;Vitamin;Choline
+Choline, total;;;;MG;Female;425;425;3500;Vitamin;Choline
+Vitamin K (phylloquinone);;;;UG;Male;120;120;1200;Vitamin;Vitamin K 
+Vitamin K (phylloquinone);;;;UG;Female;90;90;1200;Vitamin;Vitamin K 
+Alcohol, ethyl;;;;G;Both;;;;General;Alcohol
+Caffeine;;;;MG;Both;;400;;General;Caffeine
+Water;;;;G;Both;2000;3000;;General;Water
+Starch;;;;G;Both;130;225;;Carbohydrate;Starch
+Energy;;;;KCAL;Male;2000;2500;3000;General;Energy
+Energy;;;;KCAL;Female;1600;2000;2400;General;Energy
+Fatty acids, total monounsaturated;;;;G;Male;;25;;Lipids;Monounsaturated
+Fatty acids, total monounsaturated;;;;G;Female;;20;;Lipids;Monounsaturated
+Fatty acids, total polyunsaturated;;;;G;Both;;25;;Lipids;Polyunsaturated
+Fatty acids, total saturated;;;;G;Both;;22;22;Lipids;Saturated
+Fatty acids, total trans;;;;G;Both;;2;2;Lipids;Trans
+Cholesterol;;;;MG;Both;;300;300;Lipids;Cholesterol
+Isoleucine;;;;G;Male;1,2;1,6;;Protein;Isoleucine
+Isoleucine;;;;G;Female;1;1,3;;Protein;Isoleucine
+Leucine;;;;G;Male;2,9;3,3;;Protein;Leucine
+Leucine;;;;G;Female;2,2;2,5;;Protein;Leucine
+Lysine;;;;G;Male;2,8;3,3;;Protein;Lysine
+Lysine;;;;G;Female;2,3;2,8;;Protein;Lysine
+Methionine;;;;G;Both;0,8;1;;Protein;Methionine
+Cystine;;;;G;Both;0,8;;;Protein;Cystine
+Phenylalanine;;;;G;Both;1,1;1,5;;Protein;Phenylalanine
+Tyrosine;;;;G;Both;0,9;;;Protein;Tyrosine
+Valine;;;;G;Male;1,6;2;;Protein;Valine
+Valine;;;;G;Female;1,3;1,5;;Protein;Valine
+Iron, Fe;;;;MG;Both;8;11;45;Mineral;Iron

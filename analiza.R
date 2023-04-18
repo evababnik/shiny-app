@@ -14,9 +14,11 @@ library(leaflet)
 library(reshape2)
 
 # UVOZ PODATKOV
+library(readr)
+
 
 FCD <- read_excel("Food_composition_dataset.xlsx")
-
+FCD$LEVEL <- as.numeric(FCD$LEVEL)
 drzave <- data.frame(
   imena = c('Italy', 'Finland', 'France', 'Germany', 'Netherlands', 'Sweden', 'United Kingdom'),
   kratice = c('IT', 'FI', 'FR', 'DE', 'NL', 'SE', 'UK'))
@@ -32,16 +34,16 @@ SHP_0 <- get_eurostat_geospatial(resolution = 10,
 
 # FUNKCIJE (zemljevid, tabela level 1, tabela level 2)
 
-naredi_zemljevid <- function(podatki, nutrient) {
+naredi_zemljevid <- function(podatki, nutrient, SHP_0) {
   podatki <- podatki %>% group_by(COUNTRY, kratice, NUTRIENT_TEXT) %>% summarize(mean_value = mean(mean_nutri)) %>%
     dplyr::filter(NUTRIENT_TEXT == nutrient)
-
   ss <- sf::st_transform(SHP_0)
   ss <- ss %>% dplyr::filter(geo %in% drzave$kratice) %>% left_join(podatki, by = c('geo' = 'kratice')) %>%
     select(geometry, COUNTRY, NUTRIENT_TEXT, mean_value) %>% drop_na(COUNTRY)
-
+  
   return(ss)
 }
+
 
 tabela1 <- function(podatki, nutrient) {
   podatki <- podatki %>% dplyr::filter(NUTRIENT_TEXT == nutrient) %>% 

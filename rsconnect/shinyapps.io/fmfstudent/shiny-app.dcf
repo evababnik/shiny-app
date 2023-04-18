@@ -1,0 +1,13 @@
+name: shiny-app
+title: shiny-app
+username:
+account: fmfstudent
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 8878066
+bundleId: 7106633
+url: https://fmfstudent.shinyapps.io/shiny-app/
+when: 1681854586.17565
+lastSyncTime: 1681854586.17568
+asMultiple: FALSE
+asStatic: FALSE

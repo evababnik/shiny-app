@@ -51,7 +51,6 @@ ui <- navbarPage(
     <p style='flex: 2;'>It's intended for the analysis of nutrients by country in each food at the first and second level according to the classification found on <a href='https://data.europa.eu/data/datasets/food-composition-database?locale=en'>this page</a>. Also, on this page there is an accessible file in excel format from which we draw data. The countries for which the data are selected are displayed on the map. In the table below, we can see more detailed data for the first and second level of food.</p>
   </div>")
   ),
-  
   tabPanel('Calculator', icon = icon("calculator"),
            sidebarLayout(
              sidebarPanel(textInput("food_query", label = "Search for a food", placeholder = "Enter a food name..."),
